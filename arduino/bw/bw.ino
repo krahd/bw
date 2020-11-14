@@ -67,8 +67,28 @@ void addBpm (float nb) {
 }
 
 void pull () {
+
+  // TODO TOM
+  // DECIDE ABOUT HOW TO CALCULATE NUMBER OF STEPS
+  int steps = 1024; // this is random 
+  
   if (millis() > INITIAL_DELAY) {
-    Serial.println (" ***************************************");
+ 
+    for (i = 0; i < steps; i++) {
+      digitalWrite(stepPin, LOW);
+      digitalWrite(stepPin, HIGH);
+      delayMicroseconds(delayTime);
+    }
+
+    digitalWrite(dirPin, LOW); // Change direction.
+
+
+    for (i = 0; i < steps; i++) {
+      digitalWrite(stepPin, LOW);
+      digitalWrite(stepPin, HIGH);
+      delayMicroseconds(delayTime);
+    }
+
   }
 }
 
