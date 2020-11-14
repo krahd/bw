@@ -158,8 +158,10 @@ class getPulseApp(object):
             print("Exiting")
             for cam in self.cameras:
                 cam.cam.release()
+
             if self.send_serial:
                 self.serial.close()
+                
             sys.exit()
 
         for key in self.key_controls.keys():
