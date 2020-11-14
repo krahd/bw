@@ -51,14 +51,17 @@ class getPulseApp(object):
 
         self.cameras = []
         self.selected_cam = 0
+
         for i in range(3):
             camera = Camera(camera=i)  # first camera by default
             if camera.valid or not len(self.cameras):
                 self.cameras.append(camera)
             else:
                 break
+
         self.w, self.h = 0, 0
         self.pressed = 0
+
         # Containerized analysis of recieved image frames (an openMDAO assembly)
         # is defined next.
 
@@ -198,11 +201,15 @@ class getPulseApp(object):
         self.key_handler()
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Webcam pulse detector.')
+
+    parser = argparse.ArgumentParser(description='bw.')
+
     parser.add_argument('--serial', default=None,
                         help='serial port destination for bpm data')
+
     parser.add_argument('--baud', default=None,
                         help='Baud rate for serial transmission')
+                        
     parser.add_argument('--udp', default=None,
                         help='udp address:port destination for bpm data')
 

@@ -66,6 +66,7 @@ class findFaceGetPulse(object):
         self.slices = [[0]]
         self.t0 = None
         self.bpm = 0
+
         dpath = resource_path("haarcascade_frontalface_alt.xml")
         if not os.path.exists(dpath):
             print("Cascade file not present!")
@@ -112,24 +113,31 @@ class findFaceGetPulse(object):
         idx = np.where((freqs > 50) & (freqs < 180))
         pylab.figure()
         n = data.shape[0]
+
         for k in xrange(n):
             pylab.subplot(n, 1, k + 1)
             pylab.plot(self.times, data[k])
+
         pylab.savefig("data.png")
+
         pylab.figure()
+
         for k in xrange(self.output_dim):
             pylab.subplot(self.output_dim, 1, k + 1)
             pylab.plot(self.times, self.pcadata[k])
+
         pylab.savefig("data_pca.png")
 
         pylab.figure()
+
         for k in xrange(self.output_dim):
             pylab.subplot(self.output_dim, 1, k + 1)
             pylab.plot(freqs[idx], self.fft[k][idx])
-        pylab.savefig("data_fft.png")
+
+        pylab.savefig("data_fft.png")        
         quit()
 
-    def run(self, cam=None):
+    def run(self, cam = None):
         if self.t0 is None:
             self.t0 = time.time()
             self.frame_i = 0
@@ -144,7 +152,7 @@ class findFaceGetPulse(object):
         if not self.calculate_fps():
             cv2.putText(
                 self.frame_out, "Calculating FPS",
-                (10, 450), cv2.FONT_HERSHEY_PLAIN, 1.5, red_color, 2)
+                (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.0, red_color, 2)
             return
 
         # try to detect face
@@ -252,7 +260,7 @@ class findFaceGetPulse(object):
                 int(face_dict['h']))
 
     def is_face_close(self, face1, face2):
-        delta = .07
+        delta = 0.7  ## TODO TOM fine tune this value - original 0.7
         d_width = face1['w'] * delta
         d_height = face1['h'] * delta
 
