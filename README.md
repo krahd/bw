@@ -1,3 +1,7 @@
+
+## Below is the original readme, this is a fork of https://github.com/Serhiy-Shekhovtsov/webcam-pulse-detector with modifications and additions to be used in an interactive artwork. 
+
+
 ## This repository is a fork of [thearn/webcam-pulse-detector](https://github.com/thearn/webcam-pulse-detector) with few modifications made for automated video processing support:
 
 - Tracking starts automatically when face is stable for N seconds. 
