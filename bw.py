@@ -5,8 +5,8 @@ from cv2 import moveWindow
 import argparse
 import numpy as np
 import datetime
-#TODO: work on serial port comms, if anyone asks for it
-#from serial import Serial
+
+from serial import Serial
 import socket
 import sys
 
@@ -193,8 +193,15 @@ class getPulseApp(object):
         if self.bpm_plot:
             self.make_bpm_plot()
 
+
+        # TODO TOM see when how we send the bpms
         if self.send_serial:
-            self.serial.write(str(self.processor.bpm) + "\r\n")
+            if (self.processor.isNewBpm):                
+                print ("SENDING ")
+                self.processor.bpm
+                self.serial.write(self.processor.bpm)
+                self.isNewBpm = False            
+
 
         if self.send_udp:
             self.sock.sendto(str(self.processor.bpm), self.udp)

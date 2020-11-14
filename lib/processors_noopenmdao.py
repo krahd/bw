@@ -20,7 +20,7 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-default_color = (100, 255, 100)
+default_color = (255, 255, 255)
 red_color = (100, 100, 255)
 
 
@@ -66,6 +66,9 @@ class findFaceGetPulse(object):
         self.slices = [[0]]
         self.t0 = None
         self.bpm = 0
+
+        # TOM TODO        
+        self.isNewBpm = False
 
         dpath = resource_path("haarcascade_frontalface_alt.xml")
         if not os.path.exists(dpath):
@@ -152,7 +155,7 @@ class findFaceGetPulse(object):
         if not self.calculate_fps():
             cv2.putText(
                 self.frame_out, "Calculating FPS",
-                (10, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.0, red_color, 2)
+                (10, 452), cv2.FONT_HERSHEY_SIMPLEX, 0.5, default_color)
             return
 
         # try to detect face
@@ -164,6 +167,7 @@ class findFaceGetPulse(object):
             # too long without a face, restart tracking
             if self.no_face_counter > self.no_face_tolerance * self.fps:
                 print('no face reset')
+                self.isNewBpm = True
                 self.clear_buffers()
 
             # otherwise - skip this frame but don't stop reset tracking just yet
@@ -213,25 +217,25 @@ class findFaceGetPulse(object):
             cv2.putText(
                 self.frame_out, "Press 'C' to change camera (current: %s)" % str(
                     cam),
-                (10, 25), cv2.FONT_HERSHEY_PLAIN, 1.25, default_color)
+                (10, 25), cv2.FONT_HERSHEY_PLAIN, 1.0, default_color)
 
         cv2.putText(self.frame_out, "Press 'Esc' to quit",
-                   (10, 75), cv2.FONT_HERSHEY_PLAIN, 1.25, default_color)
+                   (10, 75), cv2.FONT_HERSHEY_PLAIN, 1.0, default_color)
 
     def print_tracking_menu(self, cam):
         if cam is not None:
             cv2.putText(
                 self.frame_out, "Press 'C' to change camera (current: %s)" % str(
                     cam),
-                (10, 25), cv2.FONT_HERSHEY_PLAIN, 1.25, default_color)
+                (10, 25), cv2.FONT_HERSHEY_PLAIN, 0.5, default_color)
 
         cv2.putText(
             self.frame_out, "Press 'S' to restart",
-                   (10, 50), cv2.FONT_HERSHEY_PLAIN, 1.5, default_color)
+                   (10, 50), cv2.FONT_HERSHEY_PLAIN, 1.0, default_color)
         cv2.putText(self.frame_out, "Press 'D' to toggle data plot",
-                   (10, 75), cv2.FONT_HERSHEY_PLAIN, 1.5, default_color)
+                   (10, 75), cv2.FONT_HERSHEY_PLAIN, 1.0, default_color)
         cv2.putText(self.frame_out, "Press 'Esc' to quit",
-                   (10, 100), cv2.FONT_HERSHEY_PLAIN, 1.5, default_color)
+                   (10, 100), cv2.FONT_HERSHEY_PLAIN, 1.0, default_color)
 
     def clear_buffers(self):
         self.data_buffer, self.times = [], []
