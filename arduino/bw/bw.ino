@@ -2,13 +2,16 @@ int enaPin = 5;
 int dirPin = 6;
 int stepPin = 7;
 
-#define MAX_BPMS 40
+#define MAX_BPMS 10
 #define INITIAL_DELAY 2000
+#define MIN_STEPS 400  // TOM TODO tune these values
+#define MAX_STEPS 2000
 
 int totalBpms = 0;
 float bpms[MAX_BPMS];  // bpms
 unsigned long dt[MAX_BPMS];    // # of milliseconds between beats
 unsigned long t[MAX_BPMS];     // time (millis()) of last pull for this heart
+unsigned long steps[MAX_BPMS]; // the number of steps that that heart will pull
 
 unsigned long startTime;
 
@@ -24,21 +27,19 @@ void setup() {
 
   startTime = millis();
 
+/*
   addBpm (98.6);
   addBpm (60.4);
   addBpm (80.4);
   addBpm (75.3);
-
-  for (int i = 0; i < totalBpms; i++) {
-    Serial.print ("dt[");
-    Serial.print (i);
-    Serial.print ("]: ");
-    Serial.println (dt[i]);
-    Serial.print ("t[");
-    Serial.print (i);
-    Serial.print ("]: ");
-    Serial.println (t[i]);
-  }
+  addBpm (70.3);
+  addBpm (118.6);
+  addBpm (85.4);
+  addBpm (69.4);
+  addBpm (77.3);
+  addBpm (72.3);
+*/
+  printAll();
 
 }
 
@@ -54,6 +55,7 @@ void addBpm (float nb) {
     bpms[totalBpms] = nb;
     dt[totalBpms] = calcDt(nb);
     t[totalBpms] = elapsedTime;
+    steps[totalBpms] = random (MIN_STEPS, MAX_STEPS);
     totalBpms++;
 
   } else {
@@ -66,15 +68,38 @@ void addBpm (float nb) {
   }
 }
 
-void pull () {
+void printAll() {
+  for (int i = 0; i < totalBpms; i++) {
+    Serial.print ("dt[");
+    Serial.print (i);
+    Serial.print ("]: ");
+    Serial.println (dt[i]);
+    Serial.print ("t[");
+    Serial.print (i);
+    Serial.print ("]: ");
+    Serial.println (t[i]);
+    Serial.print ("elapsedTime: ");
+    Serial.println (elapsedTime);
+  }
 
-  // TODO TOM
-  // DECIDE ABOUT HOW TO CALCULATE NUMBER OF STEPS
-  int steps = 1024; // this is random 
-  
+  Serial.println ("-----------------------------");
+
+}
+
+void pull (int which) {
+  int delayTime = 120;
+
   if (millis() > INITIAL_DELAY) {
- 
-    for (i = 0; i < steps; i++) {
+
+    Serial.print (which);
+    Serial.print ("]");
+    for (int i = 0; i < steps[which] / 100; i++) {
+      Serial.print ("*");
+    }
+    Serial.println ();
+
+    digitalWrite(dirPin, HIGH);
+    for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
       delayMicroseconds(delayTime);
@@ -83,7 +108,7 @@ void pull () {
     digitalWrite(dirPin, LOW); // Change direction.
 
 
-    for (i = 0; i < steps; i++) {
+    for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
       delayMicroseconds(delayTime);
@@ -98,18 +123,25 @@ void loop() {
 
   if (elapsedTime >= 60000) { // one minute passed
     startTime = millis();
-    Serial.print ("-----------------------------------------------------------------");
+    Serial.println ("----------------------------[minute passed]-------------------------------------");
 
   } else {
     // if under a minute we check if we are at the corresponding time of a bpm
 
-    for (int i = 0; i < MAX_BPMS; i++) {
-      if (elapsedTime - t[i] == dt[i]) {
-        Serial.print(i);
+    for (int i = 0; i < totalBpms; i++) {
+      if (elapsedTime - t[i] >= dt[i]) {
         t[i] = elapsedTime;
-        pull();
+        pull(i);
       }
     }
-
   }
+
+  if (Serial.available() > 0) {
+    float d = Serial.parseFloat ();
+    addBpm (d);  
+
+      printAll();
+  }
+
+
 }
