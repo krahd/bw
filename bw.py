@@ -206,22 +206,25 @@ class getPulseApp(object):
             ''' 
             print (self.processor.bpm)
             print (self.processor.new_mean)
-            '''
+            
             print (self.processor.faceAvailable)
             print (self.processor.bpm_estimate)
             print ("----------------------")
+            '''
                         
             if (self.processor.faceAvailable and self.processor.bpm_estimate > 0):                
-                            
-                if (time.time() - self.lastSendTime > 20):
+                
+                ###### 13 SECONDS TIMEOUT FOR NEW FACE TOM TODO CHECK FINETUNE THIS
+                if (time.time() - self.lastSendTime > 13):
                     self.lastSendTime = time.time()
                     print (" *************  SENDING **************** ")
-                    self.processor.bpm
-                    self.serial.write(self.processor.bpm)
+                    print (self.processor.bpm_estimate)
+                    print ("*****************************************")                    
+                    self.serial.write(self.processor.bpm_estimate)
                     self.processor.isNewBpm = False         
                 else:
-                    print ((time.time() - self.lastSendTime))
-                    #pass
+                    #print ((time.time() - self.lastSendTime))
+                    pass
                     
         if self.send_udp:
             self.sock.sendto(str(self.processor.bpm), self.udp)

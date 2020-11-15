@@ -66,6 +66,8 @@ void addBpm (float nb) {
     dt[place] = calcDt(nb);
     t[place] = elapsedTime;
   }
+
+  delay (3000); // stop for 3 seconds
 }
 
 void printAll() {
@@ -107,7 +109,6 @@ void pull (int which) {
 
     digitalWrite(dirPin, LOW); // Change direction.
 
-
     for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
@@ -140,7 +141,7 @@ void loop() {
     float d = Serial.parseFloat ();
     addBpm (d);  
 
-      printAll();
+    printAll();
   }
 
 
