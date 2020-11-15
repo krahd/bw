@@ -11,6 +11,7 @@ import socket
 import sys
 
 import time
+import struct
 
 class getPulseApp(object):
 
@@ -41,7 +42,7 @@ class getPulseApp(object):
                 baud = 9600
             else:
                 baud = int(baud)
-            self.serial = Serial(port=serial, baudrate=baud)
+            self.serial = Serial(port=serial, baudrate=baud, write_timeout=1)
 
         udp = args.udp
         if udp:
@@ -214,14 +215,35 @@ class getPulseApp(object):
                         
             if (self.processor.faceAvailable and self.processor.bpm_estimate > 0):                
                 
-                ###### 13 SECONDS TIMEOUT FOR NEW FACE TOM TODO CHECK FINETUNE THIS
+                ###### 13 SECONDS TIMEOUT FOR NEW FACE - TODO TOM CHECK FINETUNE THIS
                 if (time.time() - self.lastSendTime > 13):
                     self.lastSendTime = time.time()
-                    print (" *************  SENDING **************** ")
-                    print (self.processor.bpm_estimate)
-                    print ("*****************************************")                    
-                    self.serial.write(self.processor.bpm_estimate)
-                    self.processor.isNewBpm = False         
+
+                    if (self.processor.bpm == 0):
+                        bpmToSend = self.processor.bpm_estimate
+                    else:
+                        bpmToSend = self.processor.bpm
+
+
+                    if (bpmToSend > 170):  # TODO TOM fine tune maximum acceptable BPM
+                        print ("skipping " + bpmToSend)
+
+                    else:
+                        print (" *************  SENDING **************** ")
+                        print (bpmToSend)
+                        print ("*****************************************")                    
+
+                        try:
+                            
+                            self.serial.write(struct.pack('f', bpmToSend))
+                            self.serial.flush()  # TODO TOM check if needed
+
+                            self.processor.isNewBpm = False # unused as of now
+                            print ("sent!")
+                        except Exception as e: # work on python 3.x
+                            
+                            print ("exception: " + str(e))
+                            #pass
                 else:
                     #print ((time.time() - self.lastSendTime))
                     pass

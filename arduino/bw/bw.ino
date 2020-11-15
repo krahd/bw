@@ -139,9 +139,11 @@ void loop() {
 
   if (Serial.available() > 0) {
     float d = Serial.parseFloat ();
+  //  Serial.print ("received: ");  // if trying to print says port COM3 occupied
+  //  Serial.print (d);
     addBpm (d);  
 
-    printAll();
+  //  printAll();
   }
 
 
