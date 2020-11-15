@@ -1,3 +1,3 @@
 :GO
-python .\bw.py
+python .\bw.py --serial COM3
 goto :GO

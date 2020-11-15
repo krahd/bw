@@ -10,6 +10,7 @@ from serial import Serial
 import socket
 import sys
 
+import time
 
 class getPulseApp(object):
 
@@ -24,10 +25,16 @@ class getPulseApp(object):
     def __init__(self, args):
         # Imaging device - must be a connected camera (not an ip camera or mjpeg
         # stream)
+        self.lastSendTime = 0
+
         serial = args.serial
         baud = args.baud
+        
+        
         self.send_serial = False
         self.send_udp = False
+
+
         if serial:
             self.send_serial = True
             if not baud:
@@ -196,13 +203,26 @@ class getPulseApp(object):
 
         # TODO TOM see when how we send the bpms
         if self.send_serial:
-            if (self.processor.isNewBpm):                
-                print ("SENDING ")
-                self.processor.bpm
-                self.serial.write(self.processor.bpm)
-                self.isNewBpm = False            
-
-
+            ''' 
+            print (self.processor.bpm)
+            print (self.processor.new_mean)
+            '''
+            print (self.processor.faceAvailable)
+            print (self.processor.bpm_estimate)
+            print ("----------------------")
+                        
+            if (self.processor.faceAvailable and self.processor.bpm_estimate > 0):                
+                            
+                if (time.time() - self.lastSendTime > 20):
+                    self.lastSendTime = time.time()
+                    print (" *************  SENDING **************** ")
+                    self.processor.bpm
+                    self.serial.write(self.processor.bpm)
+                    self.processor.isNewBpm = False         
+                else:
+                    print ((time.time() - self.lastSendTime))
+                    #pass
+                    
         if self.send_udp:
             self.sock.sendto(str(self.processor.bpm), self.udp)
 

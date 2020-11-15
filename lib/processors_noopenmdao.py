@@ -38,7 +38,7 @@ class findFaceGetPulse(object):
 
         self.frame_in = np.zeros((10, 10))
         self.frame_out = np.zeros((10, 10))
-        self.buffer_size = 250
+        self.buffer_size = 100  # TOM original 250
 
         self.last_face_rects = pd.DataFrame(columns=['x', 'y', 'h', 'w'])
         self.fixed_face = None
@@ -67,8 +67,12 @@ class findFaceGetPulse(object):
         self.t0 = None
         self.bpm = 0
 
+        self.new_mean = 0
+        self.faceAvailable = False
+
         # TOM TODO        
         self.isNewBpm = False
+        self.bpm_estimate = 0
 
         dpath = resource_path("haarcascade_frontalface_alt.xml")
         if not os.path.exists(dpath):
@@ -162,31 +166,35 @@ class findFaceGetPulse(object):
         self.detect_face()
 
         if self.face_rect is None:
+            self.faceAvailable = False
             self.no_face_counter += 1
 
             # too long without a face, restart tracking
             if self.no_face_counter > self.no_face_tolerance * self.fps:
-                print('no face reset')
+                print('no face reset')                
                 self.isNewBpm = True
                 self.clear_buffers()
 
             # otherwise - skip this frame but don't stop reset tracking just yet
         else:
-            self.no_face_counter = 0
+            self.no_face_counter = 0            
 
             # if face is out of range - clear buffers and stop tracking
             if self.current_face_out_of_range():
                 #if self.stable_face_counter:
                 print('out of range reset')
                 self.clear_buffers()
+                self.faceAvailable = False
             else:
                 # we've got a stable face
+                self.faceAvailable = True
+                
                 if not self.tracking_running:
                     self.stable_face_counter += 1
 
                     # check if face is stable long enough, start tracking if it's
                     if self.stable_face_counter >= self.stable_face_threshold * self.fps:
-                        self.tracking_running = True
+                        self.tracking_running = True                        
                         print('stabilized')
 
             # tracking is running
@@ -199,11 +207,12 @@ class findFaceGetPulse(object):
 
                 # if we have enough data - store the mean bpm
                 if len(self.bpm_buffer) >= self.tracking_batch_size:
-                    new_mean = np.mean(self.bpm_buffer)
-                    print("(BPM estimate: %0.1f bpm. fps: %d)" % (new_mean, self.fps))
-                    self.results.append(new_mean)
+                    self.new_mean = np.mean(self.bpm_buffer)
+                    print("(BPM estimate: %0.1f bpm. fps: %d)" % (self.new_mean, self.fps))
+                    self.results.append(self.new_mean)
                     self.bpm_buffer = []
 
+            #self.faceAvailable = True            
             self.draw_face_rect()
 
         # print menu
@@ -316,7 +325,7 @@ class findFaceGetPulse(object):
 
         L = len(self.data_buffer)
 
-        # trim the data buffer and times buffer, we don't need more then buffer_size
+        # trim the data buffer and times buffer, we don't need more than buffer_size
         if L > self.buffer_size:
             self.data_buffer = self.data_buffer[-self.buffer_size:]
             self.times = self.times[-self.buffer_size:]
@@ -352,7 +361,7 @@ class findFaceGetPulse(object):
             alpha = t
             beta = 1 - t
 
-            bpm_estimate = self.freqs[idx2]
+            self.bpm_estimate = self.freqs[idx2]
             self.idx += 1
 
             x, y, w, h = self.get_subface_coord(0.5, 0.18, 0.25, 0.15)
@@ -368,10 +377,10 @@ class findFaceGetPulse(object):
             self.slices = [np.copy(self.frame_out[y1:y1 + h1, x1:x1 + w1, 1])]
             gap = (self.buffer_size - L) / self.fps
             if gap:
-                text = "(estimate: %0.1f bpm, wait %0.0f s)" % (bpm_estimate, gap)
+                text = "(estimate: %0.1f bpm, wait %0.0f s)" % (self.bpm_estimate, gap)
             else:
-                text = "(estimate: %0.1f bpm)" % (bpm_estimate)
-                self.bpm = bpm_estimate
+                text = "(estimate: %0.1f bpm)" % (self.bpm_estimate)
+                self.bpm = self.bpm_estimate
 
             tsize = 1
             cv2.putText(self.frame_out, text,
