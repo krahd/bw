@@ -38,7 +38,7 @@ class findFaceGetPulse(object):
 
         self.frame_in = np.zeros((10, 10))
         self.frame_out = np.zeros((10, 10))
-        self.buffer_size = 150  # TOM original 250
+        self.buffer_size = 120  # TOM original 250
 
         self.last_face_rects = pd.DataFrame(columns=['x', 'y', 'h', 'w'])
         self.fixed_face = None

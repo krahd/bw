@@ -226,8 +226,8 @@ class getPulseApp(object):
                     else:
                         bpmToSend = self.processor.bpm
 
-                    if (bpmToSend > 170):  # TODO TOM fine tune maximum acceptable BPM
-                        print ("skipping " + bpmToSend)
+                    if (bpmToSend > 190):  # TODO TOM fine tune maximum acceptable BPM
+                        print ("skipping (>190) " + bpmToSend)
 
                     else:
                         print (" *************  SENDING **************** ")

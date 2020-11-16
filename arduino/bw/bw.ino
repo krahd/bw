@@ -58,6 +58,7 @@ void addBpm (float nb) {
 
   // add a new bpm
   unsigned long ns = map (nb, MIN_HEART, MAX_HEART, MAX_STEPS, MIN_STEPS);
+  ns += random (-20, 20);
   //unsigned long ns = random (MIN_STEPS, MAX_STEPS); // each bpm has a random "strength"
 
   // if there's room add it to the end
