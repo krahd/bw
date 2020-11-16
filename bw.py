@@ -216,15 +216,15 @@ class getPulseApp(object):
                         
             if (self.processor.faceAvailable and self.processor.bpm_estimate > 0):                
                 
-                ###### 13 SECONDS TIMEOUT FOR NEW FACE - TODO TOM CHECK FINETUNE THIS
-                if (time.time() - self.lastSendTime > 13):
+                ###### 20 SECONDS TIMEOUT FOR NEW FACE - TODO TOM CHECK FINETUNE THIS
+                ###### check that if we send too many floats, arduino might go insane
+                if (time.time() - self.lastSendTime > 20):
                     self.lastSendTime = time.time()
 
                     if (self.processor.bpm == 0):
                         bpmToSend = self.processor.bpm_estimate
                     else:
                         bpmToSend = self.processor.bpm
-
 
                     if (bpmToSend > 170):  # TODO TOM fine tune maximum acceptable BPM
                         print ("skipping " + bpmToSend)

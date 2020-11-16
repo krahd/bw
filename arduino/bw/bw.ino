@@ -2,12 +2,14 @@ int enaPin = 5;
 int dirPin = 6;
 int stepPin = 7;
 
-#define MAX_BPMS 7
+#define MAX_BPMS 20
 #define INITIAL_DELAY 2000
 #define MIN_STEPS 600  // TOM TODO verify the tuning of these values
 #define MAX_STEPS 3000
-#define DEBUG false
-#define DELAY_NEW_BPM 5000
+#define DEBUG true
+#define DELAY_NEW_BPM 3000
+#define MIN_HEART 50
+#define MAX_HEART 150
 
 int totalBpms = 0;
 float bpms[MAX_BPMS];  // bpms
@@ -40,8 +42,10 @@ void setup() {
     addBpm (77.3);
     addBpm (72.3);
   */
-  printAll();
 
+  if (DEBUG) {
+    printAll();
+  }
 }
 
 // beats
@@ -53,43 +57,41 @@ float calcDt(float b) {
 void addBpm (float nb) {
 
   // add a new bpm
+  unsigned long ns = map (nb, MIN_HEART, MAX_HEART, MAX_STEPS, MIN_STEPS);
+  //unsigned long ns = random (MIN_STEPS, MAX_STEPS); // each bpm has a random "strength"
 
   // if there's room add it to the end
   if (totalBpms < MAX_BPMS) {
     bpms[totalBpms] = nb;
     dt[totalBpms] = calcDt(nb);
-    t[totalBpms] = elapsedTime;
-    steps[totalBpms] = random (MIN_STEPS, MAX_STEPS); // each bpm has a random "strength"
+    t[totalBpms] = elapsedTime;    
+    steps[totalBpms] = ns; 
 
     totalBpms++;
 
-// if the array is 'full' then we replace a random bpm
+    // if the array is 'full' then we replace a random bpm
   } else {
-    
+
     int place = random (MAX_BPMS);
     bpms [place] = nb;
     dt[place] = calcDt(nb);
     t[place] = elapsedTime;
-    steps[place] = random (MIN_STEPS, MAX_STEPS); // again, each bpm has a random "strength"    
+    steps[place] = ns;
   }
-
-  delay (DELAY_NEW_BPM); // stop for n seconds
 }
 
 void printAll() {
   for (int i = 0; i < totalBpms; i++) {
-    if (DEBUG) {
-      Serial.print ("dt[");
-      Serial.print (i);
-      Serial.print ("]: ");
-      Serial.println (dt[i]);
-      Serial.print ("t[");
-      Serial.print (i);
-      Serial.print ("]: ");
-      Serial.println (t[i]);
-      Serial.print ("elapsedTime: ");
-      Serial.println (elapsedTime);
-    }
+    Serial.print ("dt[");
+    Serial.print (i);
+    Serial.print ("]: ");
+    Serial.println (dt[i]);
+    Serial.print ("t[");
+    Serial.print (i);
+    Serial.print ("]: ");
+    Serial.println (t[i]);
+    Serial.print ("elapsedTime: ");
+    Serial.println (elapsedTime);
   }
 
   Serial.println ("-----------------------------");
@@ -156,8 +158,11 @@ void loop() {
     // Serial.print ("received: ");  // if trying to print says port COM3 occupied
     // Serial.print (d);
     addBpm (d);
+    delay (DELAY_NEW_BPM); // stop for n seconds
 
-    printAll();
+    if (DEBUG) {
+      printAll();
+    }
   }
 
   //printAll();
