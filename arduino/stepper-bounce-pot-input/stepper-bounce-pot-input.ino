@@ -18,12 +18,15 @@ void loop()
 
 {
   int potValue = analogRead (potPin);
+
+  potValue = 256; // to test without pot
+  
   Serial.println (potValue); // 0 .. 1023
 
   int steps = potValue * 2;  // 0 .. 2048
   int delayTime = 120;
   
-  
+  steps = random (10, 1500);
 
   int i;
   digitalWrite(dirPin, HIGH);

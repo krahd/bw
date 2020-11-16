@@ -43,6 +43,7 @@ class getPulseApp(object):
             else:
                 baud = int(baud)
             self.serial = Serial(port=serial, baudrate=baud, write_timeout=1)
+            time.sleep (3)
 
         udp = args.udp
         if udp:
