@@ -4,12 +4,12 @@ int stepPin = 7;
 
 #define MAX_BPMS 20
 #define INITIAL_DELAY 2000
-#define MIN_STEPS 600  // TOM TODO verify the tuning of these values
-#define MAX_STEPS 3000
+#define MIN_STEPS 50  // TOM TODO verify the tuning of these values
+#define MAX_STEPS 2500
 #define DEBUG false
 #define DELAY_NEW_BPM 3000
 #define MIN_HEART 50
-#define MAX_HEART 150
+#define MAX_HEART 180
 
 int totalBpms = 0;
 float bpms[MAX_BPMS];  // bpms
@@ -61,7 +61,7 @@ void setup() {
   lcd.setRGB(colorR, colorG, colorB);
 
   // Print a message to the LCD.
-  lcd.print("bw 0.2");
+  lcd.print("bw 0.3");
   delay (1000);
 
 }
@@ -74,10 +74,30 @@ float calcDt(float b) {
 // adds one new bpm to the array
 void addBpm (float nb) {
 
-  // add a new bpm
+  // safety: in case that the max at client and here are not the same.
+  if (nb > MAX_HEART) {
+    nb = MAX_HEART - random (1, 30);
+  }
+
+  // calculate corresponding steps
   unsigned long ns = map (nb, MIN_HEART, MAX_HEART, MAX_STEPS, MIN_STEPS);
-  ns += random (-20, 20);
-  //unsigned long ns = random (MIN_STEPS, MAX_STEPS); // each bpm has a random "strength"
+
+  if (DEBUG) {
+    Serial.print ("steps: ");
+    Serial.println (ns);
+  }
+
+  // salt
+  ns += random (-50, 50);
+
+  //unsigned long ns = random (MIN_STEPS, MAX_STEPS); // each bpm woudl have random "strength"
+
+  // this shouldn't happen
+  if (ns <= 0) {
+    lcd.setCursor (0, 0);
+    lcd.print ("<= ZERO");
+    ns = random (10, 40);
+  }
 
   // if there's room add it to the end
   if (totalBpms < MAX_BPMS) {
@@ -97,6 +117,15 @@ void addBpm (float nb) {
     t[place] = elapsedTime;
     steps[place] = ns;
   }
+
+  lcd.setCursor (0, 1);
+  lcd.print ("                ");
+  lcd.setCursor (0, 1);
+  lcd.print ("b");
+  lcd.print (nb);
+  lcd.print (" s");
+  lcd.print (ns);
+
 }
 
 void printAll() {
@@ -118,7 +147,7 @@ void printAll() {
 }
 
 void pull (int which) {
-  int delayTime = 120;
+  int delayTime = 120;  // max speed at which the motor doesn't skip
 
   if (millis() > INITIAL_DELAY) {
 
@@ -126,8 +155,6 @@ void pull (int which) {
       Serial.print (which);
       Serial.print ("]");
     }
-
-
     if (DEBUG) {
       for (int i = 0; i < steps[which] / 100; i++) {
         Serial.print ("*");
@@ -135,15 +162,14 @@ void pull (int which) {
       Serial.println ();
     }
 
-    digitalWrite(dirPin, HIGH);
+    digitalWrite(dirPin, HIGH); // one direction
     for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
       delayMicroseconds(delayTime);
     }
 
-    digitalWrite(dirPin, LOW); // Change direction.
-
+    digitalWrite(dirPin, LOW); // the other direction.
     for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
@@ -178,13 +204,6 @@ void loop() {
 
   if (Serial.available() > 0) {
     float d = Serial.parseFloat ();
-
-
-    lcd.setCursor (0, 1);
-    lcd.print ("                ");
-    lcd.setCursor (0, 1);
-    lcd.print ("bpm: ");
-    lcd.print (d);
 
     addBpm (d);
     delay (DELAY_NEW_BPM); // stop for n seconds
