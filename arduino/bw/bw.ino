@@ -6,7 +6,7 @@ int stepPin = 7;
 #define INITIAL_DELAY 2000
 #define MIN_STEPS 600  // TOM TODO verify the tuning of these values
 #define MAX_STEPS 3000
-#define DEBUG true
+#define DEBUG false
 #define DELAY_NEW_BPM 3000
 #define MIN_HEART 50
 #define MAX_HEART 150
@@ -159,7 +159,9 @@ void loop() {
 
   if (elapsedTime >= 60000) { // one minute passed
     startTime = millis();
-    Serial.println ("----------------------------[minute passed]-------------------------------------");
+    if (DEBUG) {
+      Serial.println ("----------------------------[minute passed]-------------------------------------");
+    }
 
   } else {
     // if under a minute we check if we are at the corresponding time of a bpm
@@ -172,16 +174,18 @@ void loop() {
     }
   }
 
-  
+
 
   if (Serial.available() > 0) {
     float d = Serial.parseFloat ();
 
-    
-    lcd.setCursor (0,1);
-    lcd.print ("received: ");
+
+    lcd.setCursor (0, 1);
+    lcd.print ("                ");
+    lcd.setCursor (0, 1);
+    lcd.print ("bpm: ");
     lcd.print (d);
-    
+
     addBpm (d);
     delay (DELAY_NEW_BPM); // stop for n seconds
 

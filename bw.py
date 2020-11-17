@@ -221,13 +221,18 @@ class getPulseApp(object):
                 if (time.time() - self.lastSendTime > 20):
                     self.lastSendTime = time.time()
 
+                    bpmToSend = 123
+
                     if (self.processor.bpm == 0):
                         bpmToSend = self.processor.bpm_estimate
                     else:
                         bpmToSend = self.processor.bpm
 
+                    bpmToSend = round (bpmToSend, 2)
+
+
                     if (bpmToSend > 190):  # TODO TOM fine tune maximum acceptable BPM
-                        print ("skipping (>190) " + bpmToSend)
+                        print ("skipping (>190) " + bpmToSend)                  
 
                     else:
                         print (" *************  SENDING **************** ")
@@ -236,7 +241,14 @@ class getPulseApp(object):
 
                         try:
                             
-                            self.serial.write(struct.pack('f', bpmToSend))
+
+                            print ("sending: " + str(bpmToSend))                            
+
+                            # self.serial.write(struct.pack('f', bpmToSend))
+                            # self.serial.write(struct.pack('f', 123.4567890123456789))
+                            self.serial.write(bytes(b'%r' % bpmToSend))
+                            # self.serial.write(bytes(b'%r' % 120.54234))
+
                             self.serial.flush()  # TODO TOM check if needed
 
                             self.processor.isNewBpm = False # unused as of now
