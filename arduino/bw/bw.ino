@@ -20,6 +20,14 @@ unsigned long steps[MAX_BPMS]; // the number of steps that that heart will pull
 unsigned long startTime;
 unsigned long elapsedTime = 0;
 
+#include "rgb_lcd.h"
+#include <Wire.h>
+rgb_lcd lcd;
+
+const int colorR = 0;
+const int colorG = 255;
+const int colorB = 0;
+
 void setup() {
 
   pinMode(dirPin, OUTPUT);
@@ -46,6 +54,16 @@ void setup() {
   if (DEBUG) {
     printAll();
   }
+
+  // set up the LCD's number of columns and rows:
+  lcd.begin(16, 2);
+
+  lcd.setRGB(colorR, colorG, colorB);
+
+  // Print a message to the LCD.
+  lcd.print("bw 0.2");
+  delay (1000);
+
 }
 
 // beats
@@ -65,8 +83,8 @@ void addBpm (float nb) {
   if (totalBpms < MAX_BPMS) {
     bpms[totalBpms] = nb;
     dt[totalBpms] = calcDt(nb);
-    t[totalBpms] = elapsedTime;    
-    steps[totalBpms] = ns; 
+    t[totalBpms] = elapsedTime;
+    steps[totalBpms] = ns;
 
     totalBpms++;
 
@@ -154,10 +172,16 @@ void loop() {
     }
   }
 
+  
+
   if (Serial.available() > 0) {
     float d = Serial.parseFloat ();
-    // Serial.print ("received: ");  // if trying to print says port COM3 occupied
-    // Serial.print (d);
+
+    
+    lcd.setCursor (0,1);
+    lcd.print ("received: ");
+    lcd.print (d);
+    
     addBpm (d);
     delay (DELAY_NEW_BPM); // stop for n seconds
 
