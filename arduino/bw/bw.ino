@@ -21,7 +21,7 @@ unsigned long startTime;
 unsigned long elapsedTime = 0;
 
 #include "rgb_lcd.h"
-#include <Wire.h>
+#include <Wire.h>   // A4 (SDA), A5 (SCL)
 rgb_lcd lcd;
 
 const int colorR = 0;
