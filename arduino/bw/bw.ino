@@ -11,6 +11,10 @@ int stepPin = 7;
 #define MIN_HEART 50
 #define MAX_HEART 180
 
+#define DELAY_TIME 120  // max speed at which the motor doesn't skip
+
+
+
 int totalBpms = 0;
 float bpms[MAX_BPMS];  // bpms
 unsigned long dt[MAX_BPMS];    // # of milliseconds between beats
@@ -147,8 +151,6 @@ void printAll() {
 }
 
 void pull (int which) {
-  int delayTime = 120;  // max speed at which the motor doesn't skip
-
   if (millis() > INITIAL_DELAY) {
 
     if (DEBUG) {
@@ -166,14 +168,14 @@ void pull (int which) {
     for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
-      delayMicroseconds(delayTime);
+      delayMicroseconds(DELAY_TIME);
     }
 
     digitalWrite(dirPin, LOW); // the other direction.
     for (int i = 0; i < steps[which]; i++) {
       digitalWrite(stepPin, LOW);
       digitalWrite(stepPin, HIGH);
-      delayMicroseconds(delayTime);
+      delayMicroseconds(DELAY_TIME);
     }
 
   }
